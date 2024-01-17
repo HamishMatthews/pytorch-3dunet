@@ -164,7 +164,8 @@ def _loader_classes(class_name):
     modules = [
         'pytorch3dunet.datasets.hdf5',
         'pytorch3dunet.datasets.dsb',
-        'pytorch3dunet.datasets.utils'
+        'pytorch3dunet.datasets.utils',
+        'pytorch3dunet.datasets.folder'
     ]
     return get_class(class_name, modules)
 
@@ -197,6 +198,9 @@ def get_train_loaders(config):
         dataset_cls_str = 'StandardHDF5Dataset'
         logger.warning(f"Cannot find dataset class in the config. Using default '{dataset_cls_str}'.")
     dataset_class = _loader_classes(dataset_cls_str)
+
+    print('train path: ', loaders_config['train']['file_paths'])
+    print('val paths: ', loaders_config['val']['file_paths'])
 
     assert set(loaders_config['train']['file_paths']).isdisjoint(loaders_config['val']['file_paths']), \
         "Train and validation 'file_paths' overlap. One cannot use validation data for training!"

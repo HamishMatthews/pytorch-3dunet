@@ -9,6 +9,8 @@ from pytorch3dunet.unet3d.losses import compute_per_channel_dice
 from pytorch3dunet.unet3d.seg_metrics import AveragePrecision, Accuracy
 from pytorch3dunet.unet3d.utils import get_logger, expand_as_one_hot, convert_to_numpy
 
+import surface_distance
+
 logger = get_logger('EvalMetric')
 
 
@@ -16,9 +18,12 @@ class DiceCoefficient:
     """Computes Dice Coefficient.
     Generalized to multiple channels by computing per-channel Dice Score
     (as described in https://arxiv.org/pdf/1707.03237.pdf) and then simply taking the average.
+
     Input is expected to be probabilities instead of logits.
+
     This metric is mostly useful when channels contain the same semantic class (e.g. affinities computed with different offsets).
     DO NOT USE this metric when training with DiceLoss, otherwise the results will be biased towards the loss.
+
     """
 
     def __init__(self, epsilon=1e-6, **kwargs):
@@ -27,6 +32,48 @@ class DiceCoefficient:
     def __call__(self, input, target):
         # Average across channels in order to get the final score
         return torch.mean(compute_per_channel_dice(input, target, epsilon=self.epsilon))
+
+class SurfaceDice():
+    """
+    Compute Mean Surface Dice Metric across Z slices as found here:
+    https://github.com/google-deepmind/surface-distance/tree/master.
+    """
+
+    def __init__(self, tolerance=0, spacing=[1, 1], **kwargs):
+        self.tolerance = tolerance
+        self.spacing = spacing
+
+    def __call__(self, input, target):
+        input, target = convert_to_numpy(input, target)
+
+        # Squeeze the batch and channel dimensions
+        input = np.squeeze(input, axis=(0, 1))  # Removes first two dimensions if they are single-channel
+        target = np.squeeze(target, axis=(0, 1))
+
+        # Convert to boolean (binary) representation
+        input = input > 0.5
+        target = target.astype(bool)
+
+        # Calculate surface distances for each Z slice
+        surface_dices = []
+        for z_slice in range(input.shape[0]):
+            slice_target = target[z_slice]
+            slice_input = input[z_slice]
+            surface_dist = surface_distance.compute_surface_distances(
+                slice_target, slice_input, self.spacing
+            )
+            surface_dice = surface_distance.compute_surface_dice_at_tolerance(
+                surface_dist, self.tolerance
+            )
+            surface_dices.append(surface_dice)
+
+        # replace NaNs with 0s
+        surface_dices = np.nan_to_num(surface_dices)
+        
+        # Compute the mean Surface Dice across all Z slices
+        mean_surface_dice = np.mean(surface_dices)
+
+        return mean_surface_dice
 
 
 class MeanIoU:

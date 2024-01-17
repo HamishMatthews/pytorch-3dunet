@@ -16,3 +16,17 @@ logs/
 # Python packages
 pytorch3dunet.egg-info/
 dist/
+
+# any files that end in log
+*.log
+
+# any hdf5 files
+*.h5
+*.hdf5
+
+# ignore raw images
+*.tif
+*.tiff
+
+# ignore cloned package
+surface-distance/

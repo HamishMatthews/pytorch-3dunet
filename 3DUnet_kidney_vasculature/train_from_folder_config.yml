@@ -1,0 +1,122 @@
+# Sample configuration file for training a 3D U-Net on a task of predicting the boundaries in 3D stack of the Arabidopsis
+# ovules acquired with the confocal microscope. Training done with a combination of Binary Cross-Entropy and DiceLoss.
+# Download train data from: https://osf.io/x9yns/
+# Download validation data from: https://osf.io/xp5uf/
+# Download test data from: https://osf.io/8jz7e/
+model:
+  name: UNet3D
+  # number of input channels to the model
+  in_channels: 1
+  # number of output channels
+  out_channels: 1
+  # determines the order of operators in a single layer (crg - Conv3d+ReLU+GroupNorm)
+  layer_order: gcr
+  # number of features at each level of the U-Net
+  f_maps: [32, 64, 128, 256]
+  # number of groups in the groupnorm
+  num_groups: 8
+  is_segmentation: True
+  final_sigmoid: True
+loss:
+  name: BCEWithLogitsLoss
+  tolerance: 0
+  spacing: [1,1]
+optimizer:
+  # initial learning rate
+  learning_rate: 0.0002
+  # weight decay
+  weight_decay: 0.00001
+# evaluation metric
+eval_metric:
+  # use AdaptedRandError metric
+  name: SurfaceDice
+lr_scheduler:
+  name: ReduceLROnPlateau
+  mode: max
+  factor: 0.5
+  patience: 30
+trainer:
+  # model with higher evaluation metric is better
+  eval_score_higher_is_better: True
+  # path to the checkpoint directory
+  checkpoint_dir: CHECKPOINT_DIR
+  # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+  # resume: CHECKPOINT_DIR\last_checkpoint.pytorch
+  resume: null
+  # path to the best_checkpoint.pytorch; to be used for fine-tuning the model with additional ground truth
+  pre_trained: null
+  # how many iterations between validations
+  validate_after_iters: 500
+  # how many iterations between tensorboard logging
+  log_after_iters: 100
+  # max number of epochs
+  max_num_epochs: 1000
+  # max number of iterations
+  max_num_iterations: 150000
+  
+loaders:
+  dataset: FolderDataset
+  batch_size: 1
+  num_workers: 0
+  image_folder: images
+  label_folder: labels
+  # Configuration for the training loader
+  train:
+    file_paths:
+     - C:\Users\hamis\OneDrive\Documents\GitHub\human-vasculature-ml-comp\blood-vessel-segmentation\train\kidney_1_dense\
+     - C:\Users\hamis\OneDrive\Documents\GitHub\human-vasculature-ml-comp\blood-vessel-segmentation\train\kidney_3_sparse\
+    # SliceBuilder configuration
+    slice_builder:
+      name: FilterSliceBuilder
+      # train patch size given to the network (adapt to fit in your GPU mem, generally the bigger patch the better)
+      patch_shape: [60, 200, 200]
+      # train stride between patches
+      stride_shape: [30, 100, 100]
+      # minimum volume of the labels in the patch
+      threshold: 0.01
+      # probability of accepting patches which do not fulfil the threshold criterion
+      slack_acceptance: 0.01
+     # data augmentation
+    transformer:
+      raw:
+        - name: Normalize
+          # parameters for the normalization
+          norm01: true
+        - name: ToTensor
+          expand_dims: true
+      label:
+        - name: Normalize
+          # parameters for the normalization
+          norm01: true
+        - name: ToTensor
+          expand_dims: true
+
+  # Configuration for the validation loader
+  val:
+    file_paths: 
+      - C:\Users\hamis\OneDrive\Documents\GitHub\human-vasculature-ml-comp\blood-vessel-segmentation\train\kidney_2_val\
+    # Validation SliceBuilder configuration
+    slice_builder:
+      name: FilterSliceBuilder
+      # train patch size given to the network (adapt to fit in your GPU mem, generally the bigger patch the better)
+      patch_shape: [60, 200, 200]
+      # train stride between patches
+      stride_shape: [60, 200, 200]
+      # minimum volume of the labels in the patch
+      threshold: 0.01
+      # probability of accepting patches which do not fulfil the threshold criterion
+      slack_acceptance: 0.01
+     # data augmentation
+    transformer:
+      raw:
+        - name: Normalize
+          # parameters for the normalization
+          norm01: true
+        - name: ToTensor
+          expand_dims: true
+      label:
+        - name: Normalize
+          # parameters for the normalization
+          norm01: true
+        - name: ToTensor
+          expand_dims: true
