@@ -30,3 +30,6 @@ dist/
 
 # ignore cloned package
 surface-distance/
+
+# ignore the whole custom config folder
+3DUnet_kidney_vasculature/

@@ -1,8 +1,4 @@
-# Sample configuration file for training a 3D U-Net on a task of predicting the boundaries in 3D stack of the Arabidopsis
-# ovules acquired with the confocal microscope. Training done with a combination of Binary Cross-Entropy and DiceLoss.
-# Download train data from: https://osf.io/x9yns/
-# Download validation data from: https://osf.io/xp5uf/
-# Download test data from: https://osf.io/8jz7e/
+# configuration file for training a 3D U-Net for segmenting vasculature structure from HiP-CT image data
 model:
   name: UNet3D
   # number of input channels to the model
