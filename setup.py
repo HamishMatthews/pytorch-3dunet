@@ -14,6 +14,6 @@ setup(
         'predict3dunet=pytorch3dunet.predict:main']
         },
     install_requires=[
-        'surface-distance @ git+https://github.com/google-deepmind/surface-distance.git#egg=surface-distance',
+        'git+https://github.com/google-deepmind/surface-distance.git',
     ],
 )

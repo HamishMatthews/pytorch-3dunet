@@ -20,18 +20,17 @@ The model evaluation is performed using the Surface Dice metric, a robust metric
 
 Installation remains similar to the original repository with minor adjustments to accommodate the new custom components.
 
-- Install the repo:
-    ```bash
-    pip install git+https://github.com/HamishMatthews/pytorch-3dunet.git
-    ```
+- Install the fork:
+   ```bash
+   pip install git+https://github.com/HamishMatthews/pytorch-3dunet.git
+   ```
 
-This will install your version of `pytorch-3dunet` along with all dependencies, including the `surface-distance` package. 
 
-If you have issues, you can directly install the surface-distance package using `pip`:
-
-```bash
-pip install git+https://github.com/google-deepmind/surface-distance.git
-```
+- Install surface-distance package:
+   ```bash
+   pip install git+https://github.com/google-deepmind/surface-distance.git
+   ```
+   
 ## Usage
 
 The usage of the `train3dunet` and `predict3dunet` commands remains the same. However, with the custom `FolderDataset` dataloader, the images and labels can now be in a directory, with its path and subfolder names included in the '.yml' configuration. 
