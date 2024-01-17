@@ -12,8 +12,5 @@ setup(
     entry_points={'console_scripts': [
         'train3dunet=pytorch3dunet.train:main',
         'predict3dunet=pytorch3dunet.predict:main']
-        },
-    install_requires=[
-        'git+https://github.com/google-deepmind/surface-distance.git',
-    ],
+        }
 )
