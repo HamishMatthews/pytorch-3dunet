@@ -29,7 +29,7 @@ dist/
 *.tiff
 
 # ignore cloned package
-surface-distance/
+/surface-distance/
 
 # ignore the whole custom config folder
-3DUnet_kidney_vasculature/
+/kidney_vasculature/
